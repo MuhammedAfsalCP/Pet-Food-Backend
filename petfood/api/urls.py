@@ -1,10 +1,13 @@
 
 from django.urls import path
-
+# from .views import UserDetails
+# from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
+# router=DefaultRouter()
+# router.register('userdetail',UserDetails)
 
 urlpatterns = [
     
@@ -12,3 +15,4 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     
 ]
+
