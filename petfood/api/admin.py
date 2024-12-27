@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User,Products,Ingredients
+from .models import User,Products
 
 class CustomUserAdmin(UserAdmin):
     model = User
@@ -22,7 +22,24 @@ class CustomUserAdmin(UserAdmin):
         ),
     )
 
+class CustomProductsAdmin(admin.ModelAdmin):
+    model = Products
+    list_display = ('Name','Category','Stock','is_deleted','Rating','product_added')  # Fields to display
+    list_filter = ('is_deleted', 'Category', 'Rating')  # Filters on the right side of the admin page
+    search_fields = ('Name', 'Brand')  # Searchable fields
+    fieldsets  = (
+        (None, {'fields': ('Name',)}),
+        ('Products info', {'fields': ('Brand', 'Price','Rating','Image','Stock','Weight')}),
+        ('Description', {'fields': ('Description',)}),
+
+        # ('Important dates', {'fields': ('last_login', 'date_joined')}),
+        ('Additional Info', {'fields': ('is_deleted','Ingredient')}),  # Include is_deleted here
+    )
+    
+    
+
+
+
 # Register the custom admin class with the User model
 admin.site.register(User, CustomUserAdmin)
-admin.site.register(Products)
-admin.site.register(Ingredients)
+admin.site.register(Products,CustomProductsAdmin)

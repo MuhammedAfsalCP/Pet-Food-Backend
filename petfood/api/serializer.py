@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User
+from .models import User,Products
 from django.contrib.auth.hashers import make_password
 
 # class UserRegisterSerializer(serializers.ModelSerializer):
@@ -33,3 +33,9 @@ from django.contrib.auth.hashers import make_password
 #         validated_data.pop('password2', None)  # Remove password2, no longer needed
 #         return super().create(validated_data)
 
+
+class ProductsSeriealizer(serializers.ModelSerializer):
+
+    class Meta:
+        model=Products
+        fields='__all__'
