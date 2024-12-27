@@ -24,12 +24,12 @@ class CustomUserAdmin(UserAdmin):
 
 class CustomProductsAdmin(admin.ModelAdmin):
     model = Products
-    list_display = ('Name','Category','Stock','is_deleted','Rating','product_added')  # Fields to display
-    list_filter = ('is_deleted', 'Category', 'Rating')  # Filters on the right side of the admin page
+    list_display = ('Name','Category','Stock','is_deleted','product_added')  # Fields to display
+    list_filter = ('is_deleted', 'Category', )  # Filters on the right side of the admin page
     search_fields = ('Name', 'Brand')  # Searchable fields
     fieldsets  = (
         (None, {'fields': ('Name',)}),
-        ('Products info', {'fields': ('Brand', 'Price','Rating','Image','Stock','Weight')}),
+        ('Products info', {'fields': ('Brand', 'Price','Image','Stock','Weight')}),
         ('Description', {'fields': ('Description',)}),
 
         # ('Important dates', {'fields': ('last_login', 'date_joined')}),
