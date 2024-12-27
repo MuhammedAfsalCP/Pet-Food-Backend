@@ -30,7 +30,7 @@ class Products(models.Model):
     Brand=models.CharField(max_length=20)
     Weight=models.CharField(max_length=20)
     Stock=models.IntegerField()
-    Rating=models.DecimalField(max_digits=2,decimal_places=1)
+   
     Image=models.ImageField(upload_to='products/')
     Ingredient=models.JSONField(default=list)
     is_deleted=models.BooleanField(default=False)
