@@ -37,7 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'api',
+    'orders',
+    'products',
+    'users',
     'rest_framework_simplejwt',
     'rest_framework'
 ]
@@ -101,7 +103,7 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-AUTH_USER_MODEL="api.User"
+AUTH_USER_MODEL="users.User"
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
@@ -145,5 +147,5 @@ SIMPLE_JWT={
     'ROTATE_REFRESH_TOKENS':True,
     'BLACKLIST_AFTER_ROTATION':True
 }
-MEDIA_ROOT=BASE_DIR /'uploads'
+MEDIA_ROOT=BASE_DIR /'upload'
 MEDIA_URL = '/media/'
