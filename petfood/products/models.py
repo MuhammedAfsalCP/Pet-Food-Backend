@@ -20,6 +20,9 @@ class Products(models.Model):
     is_deleted=models.BooleanField(default=False)
     product_added=models.DateTimeField(auto_now=True)
 
+
+    
+
     def __str__(self):
         return self.Name
     
