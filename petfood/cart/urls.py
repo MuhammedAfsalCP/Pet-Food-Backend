@@ -1,16 +1,13 @@
 
 from django.urls import path
-from .views import CartView
-from rest_framework.routers import DefaultRouter
+from .views import CartAdd,CartDelete
 
-
-router=DefaultRouter()
-router.register('cartdetails',CartView)
 
 
 
 
 urlpatterns = [
+    path('cartadd/',CartAdd.as_view()),
+    path('cartadd/<int:pk>/',CartDelete.as_view())
     
-    
-]+router.urls
+]
