@@ -9,7 +9,7 @@ class Cart(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.name}'s Cart"
+        return f"{self.user.username}'s Cart"
 
 
 class CartItem(models.Model):
@@ -20,4 +20,4 @@ class CartItem(models.Model):
     )
 
     def __str__(self):
-        return f"{self.quantity} of {self.product} from {self.cart.user.name}'s Cart"
+        return f"{self.quantity} of {self.product} from {self.cart.user.username}'s Cart"
