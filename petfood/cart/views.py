@@ -11,12 +11,22 @@ from .models import Cart,CartItem
 class CartAdd(CreateAPIView,ListAPIView):
     serializer_class=CartItemSerializer
     permission_classes=[IsAuthenticated]
+    
     def perform_create(self,serializer):
         user = self.request.user
-        cart, created = Cart.objects.get_or_create(user=user)
-        serializer.save(cart=cart)
         
-        return Response(cart)
+        cart, created = Cart.objects.get_or_create(user=user)
+        product = serializer.validated_data['product']
+        quantity=serializer.validated_data['quantity']
+        cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
+        if not created:
+            cart_item.quantity+=quantity
+            cart_item.save()
+            return Response('successfully added',status=status.HTTP_200_OK)
+        serializer.save(cart=cart)
+
+        return Response('successfully added',status=status.HTTP_201_CREATED)
+
     def get_queryset(self):
         # Get the cart items for the authenticated user
         user = self.request.user
@@ -48,6 +58,30 @@ class CartDelete(APIView):
             return Response('item Deleted',status=status.HTTP_200_OK)
         except:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+        
+    def put(self,request,pk):
+        
+        try:
+            action = request.data.get('method')
+            if action=='increase':
+                cart_item=CartItem.objects.get(id=pk)
+                cart_item.quantity+=1
+                cart_item.save()
+                serializer=CartItemSerializer(cart_item)
+            elif action=='decrease':
+                cart_item=CartItem.objects.get(id=pk)
+                if cart_item.quantity>0:
+                    cart_item.quantity-=1
+                    serializer=CartItemSerializer(cart_item)
+            
+            cart_item.save()
+            return Response("updated",status=status.HTTP_200_OK)
+        
+        except:
+            return Response("Bad Request",status=status.HTTP_400_BAD_REQUEST)
+
+
+
         
 
     
