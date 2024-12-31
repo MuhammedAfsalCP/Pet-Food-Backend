@@ -13,11 +13,16 @@ class Cart(models.Model):
 
 
 class CartItem(models.Model):
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE,related_name='cartitems')
     product = models.ForeignKey(Products, on_delete=models.CASCADE)
     quantity = models.IntegerField(
         default=1, validators=[MinValueValidator(0), MaxValueValidator(100)]
     )
+
+    @property
+
+    def item_subtotal(self):
+        return self.product.Price * self.quantity
 
     def __str__(self):
         return f"{self.quantity} of {self.product} from {self.cart.user.username}'s Cart"
