@@ -9,8 +9,13 @@ from .models import Cart,CartItem
 # Create your views here.
 
 class CartAdd(CreateAPIView,ListAPIView):
-    serializer_class=CartItemSerializer
+    
     permission_classes=[IsAuthenticated]
+    def get_serializer_class(self):
+        # Use CartSerializer for listing cart items, CartItemSerializer for creation
+        if self.request.method == "GET":
+            return CartSerializer
+        return CartItemSerializer
     
     def perform_create(self,serializer):
         user = self.request.user
@@ -28,12 +33,12 @@ class CartAdd(CreateAPIView,ListAPIView):
         return Response('successfully added',status=status.HTTP_201_CREATED)
 
     def get_queryset(self):
-        # Get the cart items for the authenticated user
+        
         user = self.request.user
-        return CartItem.objects.filter(cart__user=user)
+        return Cart.objects.filter(user=user)
 
     def list(self, request, *args, **kwargs):
-        # Override list method to return the cart items
+        
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)

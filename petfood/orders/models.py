@@ -15,6 +15,7 @@ class Order(models.Model):
     order_id=models.UUIDField(primary_key=True,default=uuid.uuid4)
     user=models.ForeignKey(User,on_delete=models.CASCADE)
     created_at=models.DateTimeField(auto_now=True)
+    address=models.TextField()
     status=models.CharField(max_length=10,choices=StatusChoices.choices,default='SH')
 
     def __str__(self):
