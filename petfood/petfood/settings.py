@@ -40,7 +40,9 @@ INSTALLED_APPS = [
     'orders',
     'products',
     'users',
+    'razorpay',
     'cart',
+    'payment',
     'rest_framework_simplejwt',
     'rest_framework'
 ]
