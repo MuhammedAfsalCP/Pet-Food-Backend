@@ -6,31 +6,44 @@ from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from .models import Cart,CartItem
+from products.models import Products
+from django.db.models import Q
 # Create your views here.
 
 class CartAdd(CreateAPIView,ListAPIView):
     
     permission_classes=[IsAuthenticated]
     def get_serializer_class(self):
-        # Use CartSerializer for listing cart items, CartItemSerializer for creation
+        
         if self.request.method == "GET":
             return CartSerializer
         return CartItemSerializer
     
-    def perform_create(self,serializer):
+    
+    def create(self,request):
         user = self.request.user
-        
+        serializer=self.get_serializer(data=request.data)
         cart, created = Cart.objects.get_or_create(user=user)
+        if not serializer.is_valid():
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         product = serializer.validated_data['product']
         quantity=serializer.validated_data['quantity']
-        cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
-        if not created:
-            cart_item.quantity+=quantity
-            cart_item.save()
-            return Response('successfully added',status=status.HTTP_200_OK)
-        serializer.save(cart=cart)
+        if product.Stock>=quantity:
+            cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
+            if not created:
+                if product.Stock>=cart_item.quantity:
+                    cart_item.quantity+=quantity
+                    cart_item.save()
+                    return Response('successfully updated',status=status.HTTP_200_OK)
+                return Response('Out Of Stock',status=status.HTTP_400_BAD_REQUEST)
+        
 
-        return Response('successfully added',status=status.HTTP_201_CREATED)
+            return Response('successfully added',status=status.HTTP_201_CREATED)
+        return Response('Out Of Stock',status=status.HTTP_400_BAD_REQUEST)
 
     def get_queryset(self):
         
@@ -46,9 +59,11 @@ class CartAdd(CreateAPIView,ListAPIView):
     
 
 class CartDelete(APIView):
+    permission_classes=[IsAuthenticated]
     def get(self,request,pk):
         try:
-            cart_item=CartItem.objects.get(id=pk)
+            user = self.request.user
+            cart_item=CartItem.objects.get(Q(id=pk)&Q(cart__user=user))
             serializer=CartItemSerializer(cart_item)
             return Response(serializer.data)
         except CartItem.DoesNotExist:
@@ -70,17 +85,25 @@ class CartDelete(APIView):
             action = request.data.get('method')
             if action=='increase':
                 cart_item=CartItem.objects.get(id=pk)
-                cart_item.quantity+=1
-                cart_item.save()
-                serializer=CartItemSerializer(cart_item)
+                if cart_item.product.Stock>=cart_item.quantity+1:
+                    cart_item.quantity+=1
+                    cart_item.save()
+                    return Response('Quantity Increased',status=status.HTTP_201_CREATED)
+                else:
+                    return Response("Out Of Stock",status=status.HTTP_400_BAD_REQUEST)
+                
+                
             elif action=='decrease':
                 cart_item=CartItem.objects.get(id=pk)
-                if cart_item.quantity>0:
+                if cart_item.quantity>1:
                     cart_item.quantity-=1
-                    serializer=CartItemSerializer(cart_item)
+                    
             
-            cart_item.save()
-            return Response("updated",status=status.HTTP_200_OK)
+                    cart_item.save()
+                    return Response('Quantity Decreased',status=status.HTTP_201_CREATED)
+                else:
+                    cart_item.delete()
+                    return Response("product Deleted",status=status.HTTP_200_OK)
         
         except:
             return Response("Bad Request",status=status.HTTP_400_BAD_REQUEST)
