@@ -1,18 +1,18 @@
 from django.shortcuts import render
 from .serialzer import CartItemSerializer,CartSerializer
-from rest_framework.generics import CreateAPIView,ListAPIView,DestroyAPIView
+from rest_framework.generics import CreateAPIView,ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+
 from .models import Cart,CartItem
-from products.models import Products
+
 from django.db.models import Q
 # Create your views here.
 
 class CartAdd(CreateAPIView,ListAPIView):
     
-    permission_classes=[IsAuthenticated]
+    
     def get_serializer_class(self):
         
         if self.request.method == "GET":
@@ -60,7 +60,7 @@ class CartAdd(CreateAPIView,ListAPIView):
     
 
 class CartDelete(APIView):
-    permission_classes=[IsAuthenticated]
+    
     def get(self,request,pk):
         try:
             user = self.request.user

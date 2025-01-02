@@ -17,14 +17,14 @@ class Order(models.Model):
 
 class OrderItem(models.Model):
     class StatusChoices(models.TextChoices):
-        ("SH", "Shipping"),
-        ("CA", "Cancelled"),
-        ("RT", "Returned"),
+        SHIPPING="Shipping"
+        CANCELLED="Cancelled"
+        RETURNED="Returned"
        
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
     product=models.ForeignKey(Products,on_delete=models.CASCADE)
     quantity=models.PositiveIntegerField(default=1)
-    status=models.CharField(max_length=10,choices=StatusChoices.choices,default='SH')
+    status=models.CharField(max_length=10,choices=StatusChoices.choices,default=StatusChoices.SHIPPING)
 
     @property
 
