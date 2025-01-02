@@ -7,6 +7,7 @@ from rest_framework.pagination import PageNumberPagination
 from .models import Products
 from rest_framework.permissions import AllowAny,IsAdminUser
 from rest_framework.views import APIView
+from django.db.models import Q
 from rest_framework.response import Response
 # Create your views here.
 
@@ -17,7 +18,7 @@ class ProductPagination(PageNumberPagination):
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 
 class ProductDetails(ModelViewSet):
-    queryset = Products.objects.all()
+    queryset = Products.objects.filter(is_deleted=False)
     serializer_class = ProductsSeriealizer
     pagination_class = ProductPagination
 
@@ -33,7 +34,7 @@ class ProductCategory(APIView):
     permission_classes=[AllowAny]
     def get(self,request,ctg):
         
-        products=Products.objects.filter(Category=ctg)
+        products=Products.objects.filter(Q(Category=ctg)&Q(is_deleted=False))
         if not products:
             return Response("Invalid Category")
         else:
