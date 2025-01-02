@@ -40,8 +40,9 @@ class CartAdd(CreateAPIView,ListAPIView):
                     cart_item.save()
                     return Response('successfully updated',status=status.HTTP_200_OK)
                 return Response('Out Of Stock',status=status.HTTP_400_BAD_REQUEST)
-        
-
+                
+            cart_item.quantity=quantity
+            cart_item.save()
             return Response('successfully added',status=status.HTTP_201_CREATED)
         return Response('Out Of Stock',status=status.HTTP_400_BAD_REQUEST)
 
