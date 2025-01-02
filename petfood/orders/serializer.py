@@ -5,22 +5,16 @@ from products.serializer import ProductsSeriealizer
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product=ProductsSeriealizer()
+
     class Meta:
         model=OrderItem
-        fields=('product','quantity')
-
+        fields=('product','quantity','status','item_subtotal')
 
 class OrderSerializer(serializers.ModelSerializer):
-    items=OrderItemSerializer(many=True)
-    total_price=serializers.SerializerMethodField(method_name='total')
-
-    def total(self,obj):
-        order_Items=obj.items.all()
-        return sum(OrderItem.item_subtotal for OrderItem in order_Items)
+    orderitems = OrderItemSerializer(many=True, source='items')
 
     
-
     class Meta:
         model=Order
-        fields=('user','created_at','status','items','total_price','address')
+        fields=('order_id','created_at','orderitems','address','total_price')
 

@@ -5,12 +5,12 @@ from cart.models import Cart,CartItem
 from orders.models import Order,OrderItem
 import razorpay
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from decouple import config
 
 # Create your views here.
 
 class Checkout(APIView):
-    permission_classes=[IsAuthenticated]
+    
     def post(self,request):
 
         cartitem=CartItem.objects.filter(cart__user=request.user)
@@ -23,19 +23,22 @@ class Checkout(APIView):
             total_price=total_price+item.product.Price*item.quantity
 
         order_currency='INR'
-        client=razorpay.Client(auth=('rzp_test_JtEUXj0BHIAbcC','WP8YrUHU4U3BWEiFAlOyqTfL'))
+        client=razorpay.Client(auth=(config('Razerpay_KeyId'),config('Razerpay_KeySecret')))
         total_price=int(total_price*100 )
         payment=client.order.create({'amount':total_price,'currency':'INR','payment_capture':1})
         
         order=Order.objects.create(user=request.user,order_id=payment['id'],address=address,total_price=total_price / 100)
         for item in cartitem:
+            product=item.product
             OrderItem.objects.create(
                 order=order,
-                product=item.product,
+                product=product,
                 quantity=item.quantity
                 
             )
-            item.product.Stock=item.product.Stock-item.quantity
+            product.Stock=product.Stock-item.quantity
+            product.save()
+            
         cart.delete()
         cartitem.delete()
         return Response("succesfully orderd",status=status.HTTP_202_ACCEPTED)
