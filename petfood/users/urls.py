@@ -1,10 +1,11 @@
 
 from django.urls import path
-from .views import UserDetails,Login
+from .views import UserDetails,Login,otpVerification
 from rest_framework.routers import DefaultRouter
 
 urlpatterns = [
     path('register/',UserDetails.as_view()),
+    path('otpverification/',otpVerification.as_view()),
     path('login/',Login.as_view()),
 ]
 

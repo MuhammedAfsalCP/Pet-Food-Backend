@@ -35,10 +35,12 @@ class OrderUpdate(APIView):
     def get(self,request,pk):
         try:
             product=OrderItem.objects.get(Q(id=pk)&~Q(status='Cancelled'))
-            serializer=OrderItemSerializer(product)
-            return Response(serializer.data)
+            
         except:
               return Response("invalid Product",status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer=OrderItemSerializer(product)
+        return Response(serializer.data)
 
     def post(self,request,pk):
         try:

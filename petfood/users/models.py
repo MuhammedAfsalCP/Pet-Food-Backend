@@ -5,6 +5,7 @@ from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
     is_deleted=models.BooleanField(default=False)
+    
     email=models.EmailField(unique=True)
     def createsuperuser(self, username, email, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
@@ -14,5 +15,6 @@ class User(AbstractUser):
     
     def delete(self):
         self.is_delete=True
+        self.is_active=False
         self.save()
     
