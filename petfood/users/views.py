@@ -1,35 +1,42 @@
-from django.shortcuts import render
-from .serializer import UserRegisterSerializer,UserVerificatioSerializer,LoginSerializer
-from rest_framework.viewsets import ModelViewSet
-from django.contrib.auth import authenticate
-from rest_framework.generics import CreateAPIView,ListAPIView
-from .models import User
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.permissions import AllowAny
 import random
 
-from django.core.mail import EmailMessage
 from django.conf import settings
+from django.contrib.auth import authenticate
+from django.core.mail import EmailMessage
+from rest_framework import status
+from rest_framework.permissions import AllowAny, IsAdminUser
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.db.models import Q
+
+from .models import User
+from .serializer import (
+    LoginSerializer,
+    UserRegisterSerializer,
+    UserVerificatioSerializer,
+    AdminShowSerializer,
+    UserAllDetailsSerializer,
+)
+
 # Create your views here.
 
 otp_store = {}
 
+
 class UserDetails(APIView):
     permission_classes = [AllowAny]
-    
+
     def post(self, request):
         serializer = UserRegisterSerializer(data=request.data)
-        
+
         if serializer.is_valid(raise_exception=True):
-            otp = ''.join(str(random.randint(0, 9)) for _ in range(6))  # Generate OTP
+            otp = "".join(str(random.randint(0, 9)) for _ in range(6))  # Generate OTP
             print(otp)
-            
-            username = request.data.get('username')
-            email = request.data.get('email')
-            
+
+            username = request.data.get("username")
+            email = request.data.get("email")
+
             if email:
                 try:
                     # Create an EmailMessage instance
@@ -46,29 +53,37 @@ class UserDetails(APIView):
                     otp_store[username] = otp
                     print(f"OTP sent to {email}: {otp}")
 
-                    return Response({"message": "OTP Successfully Sent"}, status=status.HTTP_201_CREATED)
+                    return Response(
+                        {"message": "OTP Successfully Sent"},
+                        status=status.HTTP_201_CREATED,
+                    )
 
                 except Exception as e:
                     print(f"Error sending email: {e}")
-                    return Response({"error": "Failed to send OTP email."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            
+                    return Response(
+                        {"error": "Failed to send OTP email."},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    )
+
             else:
-                return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
-            
+                return Response(
+                    {"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST
+                )
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class otpVerification(APIView):
     permission_classes = [AllowAny]
-    
+
     def post(self, request):
-        otp = request.data.get('otp')
-        username = request.data.get('username')
-        
+        otp = request.data.get("otp")
+        username = request.data.get("username")
+
         if username not in otp_store:
             return Response(
                 {"error": "Invalid request. No OTP sent to this username."},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         # Compare the received OTP with the stored OTP
@@ -76,35 +91,98 @@ class otpVerification(APIView):
         print(f"Stored OTP: {stored_otp}")
 
         if otp == stored_otp:
-            del otp_store[username]  
-           
+            del otp_store[username]
+
             verification_serializer = UserVerificatioSerializer(data=request.data)
             if verification_serializer.is_valid():
-                verification_serializer.save()  
-                
-            return Response({"message": "OTP verification successful."}, status=status.HTTP_200_OK)
+                verification_serializer.save()
+
+            return Response(
+                {"message": "OTP verification successful."}, status=status.HTTP_200_OK
+            )
         else:
             # OTP doesn't match
-            return Response({"error": "Invalid OTP. Please try again."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Invalid OTP. Please try again."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
 
 class Login(APIView):
-    permission_classes=[AllowAny]
-    def post(self,request):
-        username = request.data.get('username')
-        password = request.data.get('password')
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        username = request.data.get("username")
+        password = request.data.get("password")
         user = authenticate(username=username, password=password)
 
         if user is not None:
-            print("hi")
+
             refresh = RefreshToken.for_user(user)
             access_token = str(refresh.access_token)
-            userdetail=User.objects.get(username=username)
+            userdetail = User.objects.get(username=username)
             serializer = LoginSerializer(userdetail)
-            return Response({
-                'access': access_token,
-                'refresh': str(refresh),
-                'userdetail':serializer.data
-            })
+            return Response(
+                {
+                    "access": access_token,
+                    "refresh": str(refresh),
+                    "userdetail": serializer.data,
+                }
+            )
         else:
-            
-            return Response({'error':"invaliduser"}, status=status.HTTP_401_UNAUTHORIZED)
+
+            return Response(
+                {"error": "invaliduser"}, status=status.HTTP_401_UNAUTHORIZED
+            )
+
+
+class UserDetailsView(APIView):
+
+    def get(self, request):
+        user = request.user  # `request.user` is populated by JWTAuthentication
+        return Response(
+            {"userdetail": {"username": user.username, "is_staff": user.is_staff}}
+        )
+
+
+class TotalUsers(APIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+        users = User.objects.filter(Q(is_staff=False) & Q(is_deleted=False))
+
+        serializer = AdminShowSerializer(users, many=True)
+        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+
+
+class SpesificUser(APIView):
+    permission_classes = [IsAdminUser]
+
+    def put(self, request, pk):
+        print(request)
+        try:
+            action = request.data.get("method")
+            print(action)
+        except:
+            return Response("Bad Request", status=status.HTTP_400_BAD_REQUEST)
+
+        if action == "Block":
+            user = User.objects.get(id=pk)
+            user.is_active = False
+            user.save()
+            return Response("Blocked", status=status.HTTP_202_ACCEPTED)
+
+        elif action == "Unblock":
+            user = User.objects.get(id=pk)
+            user.is_active = True
+            user.save()
+            return Response("UnBlocked", status=status.HTTP_202_ACCEPTED)
+
+
+class useralldetails(APIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request, pk):
+        user = User.objects.get(id=pk)
+        serializer = UserAllDetailsSerializer(user, context={"request": request})
+        return Response(serializer.data)

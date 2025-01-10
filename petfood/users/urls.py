@@ -1,14 +1,21 @@
-
 from django.urls import path
-from .views import UserDetails,Login,otpVerification
-from rest_framework.routers import DefaultRouter
+
+from .views import (
+    Login,
+    UserDetails,
+    UserDetailsView,
+    otpVerification,
+    TotalUsers,
+    SpesificUser,
+    useralldetails,
+)
 
 urlpatterns = [
-    path('register/',UserDetails.as_view()),
-    path('otpverification/',otpVerification.as_view()),
-    path('login/',Login.as_view()),
+    path("register/", UserDetails.as_view()),
+    path("otpverification/", otpVerification.as_view()),
+    path("userdetailsview/", UserDetailsView.as_view()),
+    path("login/", Login.as_view()),
+    path("userdetails/", TotalUsers.as_view()),
+    path("edituser/<int:pk>/", SpesificUser.as_view()),
+    path("spesificalldetails/<int:pk>/", useralldetails.as_view()),
 ]
-
-
-
-

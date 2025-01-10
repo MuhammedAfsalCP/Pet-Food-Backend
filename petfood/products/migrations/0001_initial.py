@@ -7,25 +7,39 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Products',
+            name="Products",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('Name', models.CharField(max_length=50)),
-                ('Category', models.CharField(choices=[('Select', 'Select'), ('Dog', 'Dog'), ('Cat', 'Cat')], default='Select', max_length=6)),
-                ('Price', models.DecimalField(decimal_places=2, max_digits=7)),
-                ('Description', models.TextField()),
-                ('Brand', models.CharField(max_length=20)),
-                ('Weight', models.CharField(max_length=20)),
-                ('Stock', models.IntegerField()),
-                ('Image', models.ImageField(upload_to='products/')),
-                ('Ingredient', models.JSONField(default=list)),
-                ('is_deleted', models.BooleanField(default=False)),
-                ('product_added', models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("Name", models.CharField(max_length=50)),
+                (
+                    "Category",
+                    models.CharField(
+                        choices=[("Select", "Select"), ("Dog", "Dog"), ("Cat", "Cat")],
+                        default="Select",
+                        max_length=6,
+                    ),
+                ),
+                ("Price", models.DecimalField(decimal_places=2, max_digits=7)),
+                ("Description", models.TextField()),
+                ("Brand", models.CharField(max_length=20)),
+                ("Weight", models.CharField(max_length=20)),
+                ("Stock", models.IntegerField()),
+                ("Image", models.ImageField(upload_to="products/")),
+                ("Ingredient", models.JSONField(default=list)),
+                ("is_deleted", models.BooleanField(default=False)),
+                ("product_added", models.DateTimeField(auto_now=True)),
             ],
         ),
     ]
