@@ -2,9 +2,10 @@ import re
 
 from rest_framework import serializers
 
-from .models import User
 from cart.serialzer import CartSerializer
 from orders.serializer import OrderSerializer
+
+from .models import User
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):

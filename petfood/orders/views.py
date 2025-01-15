@@ -2,13 +2,16 @@ from django.db.models import Q
 from rest_framework import status
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAdminUser
-from .models import Order, OrderItem
-from .serializer import OrderItemSerializer, OrderSerializer, AllOrderSerializer
-from users.serializer import User
+
 from products.models import Products
+from users.serializer import User
+
+from .models import Order, OrderItem
+from .serializer import (AllOrderSerializer, OrderItemSerializer,
+                         OrderSerializer)
 
 
 # Create your views here.

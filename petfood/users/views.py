@@ -3,21 +3,17 @@ import random
 from django.conf import settings
 from django.contrib.auth import authenticate
 from django.core.mail import EmailMessage
+from django.db.models import Q
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.db.models import Q
 
 from .models import User
-from .serializer import (
-    LoginSerializer,
-    UserRegisterSerializer,
-    UserVerificatioSerializer,
-    AdminShowSerializer,
-    UserAllDetailsSerializer,
-)
+from .serializer import (AdminShowSerializer, LoginSerializer,
+                         UserAllDetailsSerializer, UserRegisterSerializer,
+                         UserVerificatioSerializer)
 
 # Create your views here.
 
