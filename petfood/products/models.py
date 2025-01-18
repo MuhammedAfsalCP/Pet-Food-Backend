@@ -15,7 +15,7 @@ class Products(models.Model):
     Brand = models.CharField(max_length=20)
     Weight = models.CharField(max_length=20)
     Stock = models.IntegerField()
-    Image = models.ImageField(upload_to="products/")
+    Image = models.ImageField(upload_to='products/')
     Ingredient = models.JSONField(default=list)
     is_deleted = models.BooleanField(default=False)
     product_added = models.DateTimeField(auto_now=True)
@@ -32,6 +32,6 @@ class Products(models.Model):
     def __str__(self):
         return self.Name
 
-    def delete(self):
-        self.is_deleted = True
-        self.save()
+    # def delete(self):
+    #     self.is_deleted = True
+    #     self.save()

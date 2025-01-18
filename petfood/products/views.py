@@ -4,10 +4,10 @@ from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
-
+from .utils import upload_image_to_s3
 from .models import Products
 from .serializer import ProductsSeriealizer
-
+from rest_framework import status
 # Create your views here.
 
 
@@ -32,7 +32,8 @@ class ProductDetails(ModelViewSet):
             return [IsAdminUser()]
         else:
             return [AllowAny()]
-
+        
+    
 
 class ProductCategory(APIView):
     permission_classes = [AllowAny]
