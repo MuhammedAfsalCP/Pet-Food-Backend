@@ -1,19 +1,19 @@
 from django.db.models import Q
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
-from .utils import upload_image_to_s3
 from .models import Products
-from .serializer import ProductsSeriealizer
+from .serializer import ProductsSerializer
 from rest_framework import status
 # Create your views here.
 
 
 class ProductPagination(PageNumberPagination):
 
-    page_size = 5
+    page_size = 10
     page_size_query_param = "page_size"
     max_page_size = 100
 
@@ -23,9 +23,9 @@ from rest_framework.permissions import AllowAny, IsAdminUser
 
 class ProductDetails(ModelViewSet):
     queryset = Products.objects.filter(is_deleted=False)
-    serializer_class = ProductsSeriealizer
+    serializer_class = ProductsSerializer
     pagination_class = ProductPagination
-
+    parser_classes = [MultiPartParser, FormParser]
     def get_permissions(self):
 
         if self.request.method in ["PUT", "POST", "DELETE", "PATCH"]:
@@ -46,7 +46,7 @@ class ProductCategory(APIView):
             return Response("Invalid Category")
         else:
             # Use the correct serializer here
-            serializer = ProductsSeriealizer(
+            serializer = ProductsSerializer(
                 products, many=True, context={"request": request}
             )
             return Response(serializer.data)
@@ -63,7 +63,7 @@ class Productfilter(APIView):
         except:
             return Response("Invalid product")
 
-        serializer = ProductsSeriealizer(
+        serializer = ProductsSerializer(
             products, many=True, context={"request": request}
         )
         return Response(serializer.data)
@@ -80,5 +80,5 @@ class offerProduct(APIView):
             return Response("Invalid product")
 
         print(products)
-        serializer = ProductsSeriealizer(products, context={"request": request})
+        serializer = ProductsSerializer(products, context={"request": request})
         return Response(serializer.data)

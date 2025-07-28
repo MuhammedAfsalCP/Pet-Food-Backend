@@ -5,16 +5,31 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from django.utils import timezone
 from products.models import Products
 from users.serializer import User
 
-from .models import Order, OrderItem
+from .models import Order, OrderItem,Notification
 from .serializer import (AllOrderSerializer, OrderItemSerializer,
-                         OrderSerializer)
+                         OrderSerializer,NotificationSerializer)
 
 
-# Create your views here.
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
+def create_notification(user, message):
+    notification = Notification.objects.create(user=user, message=message)
+    
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        f"user_{user.id}",  # group name should match in consumer
+        {
+            "type": "send_notification",
+            "message": message,
+            "timestamp": str(notification.created_at)
+        }
+    )
+
 class ProductPagination(PageNumberPagination):
     page_size = 5
     page_size_query_param = "page_size"
@@ -43,24 +58,34 @@ class OrderView(ListAPIView):
 class OrderUpdate(APIView):
 
     def put(self, request, pk):
-        print(request)
         action = request.data.get("method")
-        print(action)
+        if not action:
+            return Response({"error": "Missing method action"}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
-
             product = OrderItem.objects.get(Q(id=pk) & ~Q(status="Cancelled"))
+        except OrderItem.DoesNotExist:
+            return Response("Invalid Product", status=status.HTTP_400_BAD_REQUEST)
 
-        except:
-            return Response("invalid Product", status=status.HTTP_400_BAD_REQUEST)
+        order = product.order
+
         if action == "Cancelled":
+            item_total = product.item_subtotal
+            order.total_price -= item_total
             product.status = "Cancelled"
-            product.save()
-            return Response("updated", status=status.HTTP_202_ACCEPTED)
-        elif action == "Returned":
-            product.status = "Returned"
-            product.save()
-            return Response("updated", status=status.HTTP_202_ACCEPTED)
 
+        elif action in ["Shipped", "Delivered"]:
+            product.status = action
+            create_notification(order.user, f"Your order item '{product.product.Name}' is now {action}.")
+
+        else:
+            return Response({"error": "Invalid action method"}, status=status.HTTP_400_BAD_REQUEST)
+
+        order.updated_at = timezone.now()
+        order.save()
+        product.save()
+
+        return Response("Updated", status=status.HTTP_202_ACCEPTED)
 
 class allorder(APIView):
     permission_classes = [IsAdminUser]
@@ -82,22 +107,6 @@ class Specificorder(APIView):
 
         serializer = OrderSerializer(orderitem, context={"request": request})
         return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
-
-    def put(self, request, pk):
-        action = request.data.get("method")
-        print(action)
-        try:
-
-            orderitems = OrderItem.objects.filter(
-                Q(order__id=pk) & ~Q(status="Cancelled")
-            )
-            print(orderitems)
-
-        except:
-            return Response("invalid Product", status=status.HTTP_400_BAD_REQUEST)
-        if action == "Delivered":
-            orderitems.update(status="Delivered")
-            return Response("updated", status=status.HTTP_202_ACCEPTED)
 
 
 class TotalPayment(APIView):
@@ -121,3 +130,26 @@ class TotalPayment(APIView):
             },
             status=status.HTTP_200_OK,
         )
+class NotificationListAPIView(APIView):
+    
+
+    def get(self, request):
+        notifications = Notification.objects.filter(user=request.user).order_by('-created_at')
+        serializer = NotificationSerializer(notifications, many=True)
+        return Response(serializer.data)
+
+# 2. Unread count
+class UnreadNotificationCountAPIView(APIView):
+  
+
+    def get(self, request):
+        count = Notification.objects.filter(user=request.user, is_read=False).count()
+        return Response({"unread_count": count})
+
+# 3. Mark one notification as read
+class MarkAllNotificationsAsReadAPIView(APIView):
+
+    def post(self, request):
+        notifications = Notification.objects.filter(user=request.user, is_read=False)
+        notifications.update(is_read=True)
+        return Response({"message": "All notifications marked as read."})

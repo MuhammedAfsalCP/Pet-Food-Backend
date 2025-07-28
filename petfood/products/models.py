@@ -15,7 +15,7 @@ class Products(models.Model):
     Brand = models.CharField(max_length=20)
     Weight = models.CharField(max_length=20)
     Stock = models.IntegerField()
-    Image = models.ImageField(upload_to='products/')
+    Image = models.URLField()
     Ingredient = models.JSONField(default=list)
     is_deleted = models.BooleanField(default=False)
     product_added = models.DateTimeField(auto_now=True)

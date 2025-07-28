@@ -19,7 +19,7 @@ class Checkout(APIView):
         total_price_paise = int(total_price * 100)  # Convert to paise
 
         client = razorpay.Client(
-            auth=(config("Razerpay_KeyId"), config("Razerpay_KeySecret"))
+            auth=("rzp_test_KVYa3j27SRKqtq", "zZvoDKD9cMaBSTKMO8kFa0jo")
         )
 
         # Create Razorpay payment order
@@ -45,7 +45,7 @@ class VerifyPayment(APIView):
         razorpay_signature = request.data.get("signature")
 
         client = razorpay.Client(
-            auth=(config("Razerpay_KeyId"), config("Razerpay_KeySecret"))
+            auth=("rzp_test_KVYa3j27SRKqtq", "zZvoDKD9cMaBSTKMO8kFa0jo")
         )
 
         try:

@@ -22,13 +22,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config("SECRET_KEY")
+SECRET_KEY = "dhfjhdj^$7364736"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+import cloudinary
 
 # Application definition
 
@@ -50,8 +50,14 @@ INSTALLED_APPS = [
     "payment",
     "rest_framework_simplejwt",
     "rest_framework",
+    "cloudinary",
+    "channels"
 ]
-
+cloudinary.config(
+    cloud_name="dhvjaalwh",
+    api_key="866668241343445",
+    api_secret="V9c-gBmB0E-1X4Qjuyt5b8VxecU"
+)
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -84,22 +90,35 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "petfood.wsgi.application"
+ASGI_APPLICATION = 'petfood.asgi.application'
 
-
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+import os
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
+#     }
+# }
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "petfooddb",
-        "HOST":"petfooddb.c3yak42s4o34.eu-north-1.rds.amazonaws.com",
-        "PORT":"5432",
-        "USER":"petfood",
-        "PASSWORD": config("PSQL_PASS")
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'e_commerce_petfood',
+        'USER': 'e_commerce_petfood_user',
+        'PASSWORD': 'vVAwj9jV8Hk2oxahA4lywwVes4OfLtxa',
+        'HOST': 'dpg-d2108kh5pdvs739hloug-a.oregon-postgres.render.com',  
+        'PORT': '5432',
     }
 }
+
 
 # settings.py
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
@@ -107,7 +126,7 @@ EMAIL_HOST = "smtp.gmail.com"  # For Gmail
 EMAIL_PORT = 587  # Standard SMTP port
 EMAIL_USE_TLS = True  # TLS is usually required for security
 EMAIL_HOST_USER = "petfood234@gmail.com"  # Your email address
-EMAIL_HOST_PASSWORD = config("Email_KEY")  # Your email password
+EMAIL_HOST_PASSWORD = "wmtk bukc yzrs loye"
 DEFAULT_FROM_EMAIL = "petfood234@gmail.com"  # The email address shown as the sender
 
 # Password validation
@@ -161,43 +180,16 @@ REST_FRAMEWORK = {
 from datetime import timedelta
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=14),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
 }
-# settings.py
-
-import os
-
-# Set the path for media files (images, documents, etc.)
- # This will be the URL prefix for accessing media files
-
-  # Path to the 'upload' folder in your project directory
 
 
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 
-AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY")
-AWS_STORAGE_BUCKET_NAME = config("AWS_STORAGE_BUCKET_NAME")
-AWS_S3_SIGNATURE_NAME = config("AWS_S3_SIGNATURE_NAME")
-AWS_S3_REGION_NAME = config("AWS_S3_REGION_NAME")
-AWS_S3_FILE_OVERWRITE = False
-AWS_DEFAULT_ACL =  None
-AWS_S3_VERITY = True
-# settings.py
-
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
-
-# AWS_S3_VERIFY = True  # Corrected typo, should be AWS_S3_VERIFY
-AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
-MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
-
-# Optional configurations
-AWS_S3_OBJECT_PARAMETERS = {
-    'CacheControl': 'max-age=86400',
-}
 
 

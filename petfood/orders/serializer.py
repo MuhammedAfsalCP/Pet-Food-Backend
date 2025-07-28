@@ -1,12 +1,12 @@
 from rest_framework import serializers
 
-from products.serializer import ProductsSeriealizer
+from products.serializer import ProductsSerializer
 
-from .models import Order, OrderItem
+from .models import Order, OrderItem,Notification
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
-    product = ProductsSeriealizer()
+    product = ProductsSerializer()
 
     class Meta:
         model = OrderItem
@@ -18,7 +18,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ("order_id", "created_at", "orderitems", "address", "total_price")
+        fields = ("order_id", "created_at", "orderitems", "address", "total_price","updated_at")
 
 
 class AllOrderSerializer(serializers.ModelSerializer):
@@ -26,3 +26,8 @@ class AllOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ("order_id", "created_at", "total_price", "id")
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = ['id', 'message', 'created_at', 'is_read']

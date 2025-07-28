@@ -8,7 +8,7 @@ class CartItemSerializer(serializers.ModelSerializer):
     product_price = serializers.DecimalField(
         max_digits=10, decimal_places=2, source="product.Price", read_only=True
     )
-    product_image = serializers.ImageField(source="product.Image", read_only=True)
+    product_image = serializers.CharField(source="product.Image", read_only=True)
     product_weight = serializers.CharField(source="product.Weight", read_only=True)
 
     class Meta:

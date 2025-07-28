@@ -12,6 +12,6 @@ urlpatterns = [
     path("productcategory/<str:ctg>/", ProductCategory.as_view()),
     path("productfilter/<str:flt>/", Productfilter.as_view()),
     path("offerproduct/", offerProduct.as_view()),
-] + router.urls
+] + router.urls 
 
 # Serve media files during development when DEBUG is True
